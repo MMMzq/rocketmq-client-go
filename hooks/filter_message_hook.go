@@ -15,32 +15,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package internal
+package hooks
 
-import (
-	"errors"
-	"fmt"
-	"regexp"
-)
+import "github.com/apache/rocketmq-client-go/v2/primitive"
 
-const (
-	_ValidPattern       = "^[%|a-zA-Z0-9_-]+$"
-	_CharacterMaxLength = 255
-)
-
-var (
-	_Pattern = regexp.MustCompile(_ValidPattern)
-)
-
-func ValidateGroup(group string) error {
-	if group == "" {
-		return errors.New("consumerGroup is empty")
-	}
-	if len(group) > _CharacterMaxLength {
-		return errors.New("the specified group is longer than group max length 255")
-	}
-	if !_Pattern.MatchString(group) {
-		return fmt.Errorf("the specified group[%s] contains illegal characters, allowing only %s", group, _ValidPattern)
-	}
-	return nil
+type FilterMessageContext struct {
+	ConsumerGroup string
+	Msg           []*primitive.MessageExt
+	MQ            *primitive.MessageQueue
+	Arg           interface{}
+	UnitMode      bool
 }
+
+type FilterMessageHook func(ctx *FilterMessageContext) ([]*primitive.MessageExt, error)
